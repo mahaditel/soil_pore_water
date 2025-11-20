@@ -48,7 +48,7 @@ theme_poster <- function(base_size = 28, base_family = "sans")
 
 
 # read in the file from data / mahadi  #clean_names() to fix error in the variables names
-mahadi_biomass.df <- read_excel("Data/NREC biomass.xlsx") |> clean_names()
+mahadi_biomass.df <- read_excel("Data/NREC biomass,2024.xlsx") |> clean_names()
 
 mahadi_biomass.df <-  mahadi_biomass.df |>
   mutate(crop = as.factor(crop)) |> 

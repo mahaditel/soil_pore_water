@@ -17,11 +17,8 @@ library(readxl)
 library(skimr) 
 library(janitor) 
 library(patchwork)
-# library(dplyr)
-# library(dplyr)
-# library(ggplot2)
-# library(dplyr)
-# library(ggplot2)
+library(dplyr)
+library(ggplot2)
 
 
 
@@ -48,12 +45,16 @@ theme_poster <- function(base_size = 28, base_family = "sans")
 
 
 # read in the file from data / mahadi  #clean_names() to fix error in the variables names
-mahadi.df <- read_excel("Data/NREC biomass.xlsx") |> clean_names()
+mahadi.df <- read_excel("Data/NREC biomass,2024.xlsx") |> clean_names()
 
 mahadi.df <-  mahadi.df |>
   mutate(crop = as.factor(crop)) |> 
   mutate(crop = fct_relevel(crop, "PCRO", "CR", "AR", "GPC", "WPC", "F" ))
-
+#to see the treatments
+mahadi.df$crop
+length(unique(mahadi.df$crop))
+summarise(mahadi.df)
+unique(mahadi.df$crop)
 levels(mahadi.df$crop)  
 
 mahadi.df |> 

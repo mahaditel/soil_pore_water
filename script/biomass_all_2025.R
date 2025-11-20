@@ -1,0 +1,168 @@
+# # install packages
+# install.packages("devtools") # install new things from developmental sources
+# install.packages("tidyverse") # dplyr and piping and ggplot etc
+# install.packages("lubridate") # dates and times
+# install.packages("readxl") # read in excel files
+# install.packages("janitor") # clean up excel imports
+# install.packages("patchwork") # arrange multiple plots per page
+# install.packages("skimr") # quick summary stats
+# install.packages("plotly") # cool ggplot things
+# install.packages("scales") # scales on ggplot axes
+
+# you will load a subset of these each time you run R 
+library(tidyverse) 
+library(lubridate) 
+library(scales) 
+library(readxl) 
+library(skimr) 
+library(janitor) 
+library(patchwork)
+library(dplyr)
+library(ggplot2)
+
+
+
+# Make a new default theme
+# Run this and it will store it as an object for use later
+theme_poster <- function(base_size = 28, base_family = "sans")
+{theme(
+  axis.line = element_line(linewidth  = 1, linetype = "solid"), 
+  axis.ticks = element_line(colour = "black"),
+  axis.title = element_text(size = 24, face = "bold"), 
+  axis.text = element_text(colour = "black"),
+  axis.text.x = element_text(size = 22, face = "bold"),
+  axis.text.y = element_text(size = 24, face="bold"),
+  plot.title = element_text(face = "bold"),
+  legend.text = element_text(size = 18, face = "bold"), 
+  legend.title = element_text(size = 24, face = "bold"), 
+  legend.key = element_rect(fill = NA),
+  legend.position = "right",
+  legend.background = element_rect(fill = NA),
+  panel.grid.major = element_line(linetype = "blank"),
+  panel.grid.minor = element_line(linetype = "blank"),
+  panel.background = element_rect(fill = NA))
+}
+
+
+# read in the file from data / mahadi  #clean_names() to fix error in the variables names
+mahadi.df <- read_excel("Data/cc_biomass_isu_wiu_24_25.xlsx") |> clean_names()
+
+#to see the treatments
+mahadi.df$crop
+length(unique(mahadi.df$crop))
+summarise(mahadi.df)
+unique(mahadi.df$crop)
+levels(mahadi.df$crop)  
+
+mahadi.df <-  mahadi.df |>
+  mutate(crop = as.factor(crop)) |> 
+  mutate(crop = fct_relevel(crop, "F", "CR", "AR", "GPC", "WPC", "PCRO" ))
+
+mahadi.df <-  mahadi.df |>
+  mutate(year = as.factor(year))
+
+scale_color <- scale_color_manual(
+  name = "Location of\nExperiment",          # Legend title
+  labels = c(
+    ISU = "ISU", WIU = "WIU"),          # Set labels matching the type column
+  values = c(ISU =  "red3", WIU = "purple2")         # Set colors for '90cm' and '45cm'
+)
+
+scale_fill <- scale_fill_manual(
+  name = "Location of\nExperiment",          # Legend title
+  labels = c(
+    ISU = "ISU", WIU = "WIU"),          # Set labels matching the type column
+  values = c(ISU =  "red3", WIU = "purple2")         # Set colors for '90cm' and '45cm'
+)
+
+#############################
+#biomass 2024 for isu and wiu
+bm24.plot <- mahadi.df |>
+  #filter(farm == "ISU") |>
+  filter(year == "2024") |>
+  ggplot(aes(x = crop, y = biomass_g_m_sq, color = farm, fill = farm)) + 
+  stat_summary(fun = mean, geom = "col",  # Changed to geom_col() for better bar orientation
+               position = position_dodge(width = 0.9)) + 
+  stat_summary(fun.data = mean_se, geom = "errorbar", 
+               width = 0.2, position = position_dodge(width = 0.9), color = "black") +
+  scale_color +
+  scale_fill +
+  scale_x_discrete(labels = c(
+    "PCRO" = "Pea, Clover,\nRadish, Oat", 
+    "CR" = "Cereal\nRye", 
+    "AR" = "Annual\nRye", 
+    "GPC" = "Golden\nPennycress", 
+    "WPC" = "Wild\nPennycress", 
+    "F" = "Fallow"
+  )) +
+  geom_hline(yintercept = c(0, 500, 1000, 1500), linetype = "dashed", color = "black", alpha = 0.5) +  # Add dashed horizontal lines
+  labs(x = "", y = expression(bold("Biomass (g m"^-2*")"))) +
+  theme_poster()+
+  labs(title = "2024:Cover Crops Biomass")+
+  theme(plot.title = element_text(hjust = 0.5, size = 24))  # Center the title
+
+
+bm24.plot
+
+ggsave(bm24.plot, file="figures/biomass_f_2024.png", units = "in", 
+       width = 15, height = 6)
+
+
+
+##################################
+#biomass 2025 for isu and wiu
+bm.plot <- mahadi.df |>
+  #filter(farm == "ISU") |>
+  filter(year == "2025") |>
+  ggplot(aes(x = crop, y = biomass_g_m_sq, color = farm, fill = farm)) + 
+  stat_summary(fun = mean, geom = "col",  # Changed to geom_col() for better bar orientation
+               position = position_dodge(width = 0.9)) + 
+  stat_summary(fun.data = mean_se, geom = "errorbar", 
+               width = 0.2, position = position_dodge(width = 0.9), color = "black") +
+  scale_color +
+  scale_fill +
+  scale_x_discrete(labels = c(
+    "PCRO" = "Pea, Clover,\nRadish, Oat", 
+    "CR" = "Cereal\nRye", 
+    "AR" = "Annual\nRye", 
+    "GPC" = "Golden\nPennycress", 
+    "WPC" = "Wild\nPennycress", 
+    "F" = "Fallow"
+  )) +
+  geom_hline(yintercept = c(0, 500, 1000, 1500), linetype = "dashed", color = "black", alpha = 0.5) +  # Add dashed horizontal lines
+  labs(x = "", y = expression(bold("Biomass (g m"^-2*")"))) +
+  theme_poster()+
+  labs(title = "2025:Cover Crops Biomass")+
+  theme(plot.title = element_text(hjust = 0.5, size = 24))  # Center the title
+
+
+bm.plot
+
+ggsave(bm.plot, file="figures/biomass_f_2025.png", units = "in", 
+       width = 15, height = 6)
+
+
+
+##################################
+#biomass isu and wiu facet by year
+bm_all.plot <- mahadi.df |>
+  #filter(farm == "ISU") |>
+  ggplot(aes(x = crop, y = biomass_g_m_sq, color = farm, fill = farm)) + 
+  stat_summary(fun = mean, geom = "col",  # Changed to geom_col() for better bar orientation
+               position = position_dodge(width = 0.9)) + 
+  stat_summary(fun.data = mean_se, geom = "errorbar", 
+               width = 0.2, position = position_dodge(width = 0.9), color = "black") +
+  scale_color +
+  scale_fill +
+  geom_hline(yintercept = c(0, 500, 1000, 1500), linetype = "dashed", color = "black", alpha = 0.5) +  # Add dashed horizontal lines
+  labs(x = "", y = expression(bold("Biomass (g m"^-2*")"))) +
+  facet_grid(. ~ year)+
+  theme_poster()+
+  labs(title = "Cover Crops Biomass")+
+  theme(plot.title = element_text(hjust = 0.5, size = 24))  # Center the title
+
+
+bm_all.plot
+
+ggsave(bm_all.plot, file="figures/biomass_all_2024_2025.png", units = "in", 
+       width = 15, height = 6)

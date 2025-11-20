@@ -1,42 +1,42 @@
-# install packages
-install.packages("devtools") # install new things from developmental sources
-install.packages("tidyverse") # dplyr and piping and ggplot etc
-install.packages("lubridate") # dates and times
-install.packages("readxl") # read in excel files
-install.packages("janitor") # clean up excel imports
-install.packages("patchwork") # arrange multiple plots per page
-install.packages("skimr") # quick summary stats
-install.packages("plotly") # cool ggplot things
-install.packages("scales") # scales on ggplot axes
+# # install packages
+# install.packages("devtools") # install new things from developmental sources
+# install.packages("tidyverse") # dplyr and piping and ggplot etc
+# install.packages("lubridate") # dates and times
+# install.packages("readxl") # read in excel files
+# install.packages("janitor") # clean up excel imports
+# install.packages("patchwork") # arrange multiple plots per page
+# install.packages("skimr") # quick summary stats
+# install.packages("plotly") # cool ggplot things
+# install.packages("scales") # scales on ggplot axes
 
 # you will load a subset of these each time you run R 
 library(tidyverse) 
-library(lubridate) 
+# library(lubridate) 
 library(scales) 
 library(readxl) 
 library(skimr) 
 library(janitor) 
 library(patchwork)
-library(dplyr)
-library(dplyr)
-library(ggplot2)
-library(dplyr)
-library(ggplot2)
+# library(dplyr)
+# library(dplyr)
+# library(ggplot2)
+# library(dplyr)
+# library(ggplot2)
 
-# Install these one time and run the library  - use in R studio
-install.packages("ggThemeAssist") 
-# helps reformat code - only run library one time
-install.packages("styler") # allows you to reformat code to look like a pro!!
+# # Install these one time and run the library  - use in R studio
+# install.packages("ggThemeAssist") 
+# # helps reformat code - only run library one time
+# install.packages("styler") # allows you to reformat code to look like a pro!!
+# 
+# library(ggThemeAssist)
+# library(styler) 
 
-library(ggThemeAssist)
-library(styler) 
-
-# Install for stats
-install.packages("car") # stats and ANOVA - essential 
-install.packages("emmeans") # estimated marginal means for unbalanced designs 
-install.packages("multcomView") # paired comparisons - note this will interfear with DPLYR!!
-install.packages("Rmisc") # stats 
-install.packages("Hmisc") # stats install.packages("broom") # output models cleanly 
+# # Install for stats
+# install.packages("car") # stats and ANOVA - essential 
+# install.packages("emmeans") # estimated marginal means for unbalanced designs 
+# install.packages("multcomView") # paired comparisons - note this will interfear with DPLYR!!
+# install.packages("Rmisc") # stats 
+# install.packages("Hmisc") # stats install.packages("broom") # output models cleanly 
 
 
 
@@ -414,6 +414,7 @@ ggsave(final.plot, file="figures/nitrate-n-dot.pdf", units = "in",
        width = 16, height = 6)
 
 
+# Final Poster code ------
 
 ####################
 ########################
@@ -425,6 +426,7 @@ mahadi.df <- read_excel("Data/NREC Lysimeter Results.xlsx") |> clean_names()
 #to see the treatments
 mahadi.df$crop
 length(unique(mahadi.df$crop))
+
 summarise(mahadi.df)
 unique(mahadi.df$crop)
 
@@ -445,28 +447,33 @@ mahadi.df <-  mahadi.df |>
 # this will show the levels
 levels(mahadi.df$crop)
 
+scale_color <- scale_color_manual(
+  name = "Lysimeter \nDepth",          # Legend title
+  labels = c(
+    "45cm", "90cm"),          # Set labels matching the type column
+  values = c("coral", "cyan3")         # Set colors for '90cm' and '45cm'
+)
 
+scale_fill <- scale_fill_manual(
+  name = "Lysimeter \nDepth",          # Legend title
+  labels = c(
+    "45cm", "90cm"),          # Set labels matching the type column
+  values = c("coral", "cyan3")         # Set colors for '90cm' and '45cm'
+)
 
 
 #####################
-isu.nplot<-mahadi.df |> 
+isu.nplot <- mahadi.df |> 
   filter(farm == "ISU") |>
-  ggplot(aes(x = porewater_no3_mgl, y = as.factor(crop), color = type, fill = type)) + 
+  ggplot(aes(x = porewater_no3_mgl, y = crop, color = type, fill = type)) + 
   stat_summary(fun = mean, geom = "col",  # Changed to geom_col() for better bar orientation
-               position = position_dodge(width = 0.8), alpha = 0.5) + 
+               position = position_dodge(width = 0.9), alpha = 0.5) + 
   stat_summary(fun.data = mean_se, geom = "errorbar", 
-               width = 0.2, position = position_dodge(width = 0.8)) +  # Adding error bars for mean SE
-  scale_color_manual(
-    name = "Lysimeter \nDepth",          # Legend title
-    labels = c(
-      "45cm", "90cm"),          # Set labels matching the type column
-    values = c("coral", "cyan3")         # Set colors for '90cm' and '45cm'
-  ) + 
-  scale_fill_manual(
-    values = c("coral", "cyan3")         # Ensure fill matches color for clarity
-  ) + 
+               width = 0.2, position = position_dodge(width = 0.9)) +  # Adding error bars for mean SE
+  scale_color + 
+  scale_fill + 
   coord_cartesian(xlim = c(0, 30)) +     # Adjust xlim to fit Nitrate-N range
-  labs(title = "ISU", x = "Nitrate-N (mg/L)", y = "Crop") +  # Correct axis labels
+  labs(title = "A) ISU", x = "Nitrate-N (mg/L)", y = "Crop") +  # Correct axis labels
   theme_classic() + 
   geom_vline(xintercept = c(0, 10, 20, 30), linetype = "dashed", color = "black",alpha=0.2)  # Add dashed vertical lines
 isu.nplot
@@ -477,31 +484,25 @@ wiu.nplot<-mahadi.df |>
   filter(farm == "WIU") |>
   ggplot(aes(x = porewater_no3_mgl, y = as.factor(crop), color = type, fill = type)) + 
   stat_summary(fun = mean, geom = "col",  # Changed to geom_col() for better bar orientation
-               position = position_dodge(width = 0.8), alpha = 0.5) + 
+               position = position_dodge(width = 0.9), alpha = 0.5) + 
   stat_summary(fun.data = mean_se, geom = "errorbar", 
-               width = 0.2, position = position_dodge(width = 0.8)) +  # Adding error bars for mean SE
-  scale_color_manual(
-    name = "Lysimeter \nDepth",          # Legend title
-    labels = c(
-      "45cm", "90cm"),          # Set labels matching the type column
-    values = c("coral", "cyan3")         # Set colors for '90cm' and '45cm'
-  ) + 
-  scale_fill_manual(
-    values = c("coral", "cyan3")         # Ensure fill matches color for clarity
-  ) + 
+               width = 0.2, position = position_dodge(width = 0.9)) +  # Adding error bars for mean SE
+  scale_color + 
+  scale_fill + 
   coord_cartesian(xlim = c(0, 30)) +     # Adjust xlim to fit Nitrate-N range
-  labs(title = "WIU", x = "Nitrate-N (mg/L)", y = "Crop") +  # Correct axis labels
+  labs(title = "B) WIU", x = "Nitrate-N (mg/L)", y = "Crop") +  # Correct axis labels
   theme_classic() + 
   geom_vline(xintercept = c(0, 10, 20, 30), linetype = "dashed", color = "black",alpha=0.2)  # Add dashed vertical lines
 wiu.nplot
 
 
 final.nplot <-
-  isu.nplot + theme_classic(base_size = 26,)+ 
+  isu.nplot + theme_classic(base_size = 26)+ 
   theme( strip.text = element_blank(), strip.background = element_blank())+
-  wiu.nplot + theme_classic(base_size = 26,)+ 
+  wiu.nplot + theme_classic(base_size = 26)+ 
   theme( axis.title.y=element_blank(), axis.text.y=element_blank(), strip.background = element_blank()) +
   plot_layout(ncol = 2, guides = "collect") +
+  # plot_annotation(tag_levels = "A", tag_suffix = ")")
   NULL
 final.nplot
 
@@ -510,27 +511,20 @@ ggsave(final.nplot, file="figures/nitrate-n-dot.png", units = "in",
 
 
 
-#############ppppppppp###################
-#########################################
-#####################
+#############ppppppppp# # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 isu.pplot<-mahadi.df |> 
   filter(farm == "ISU") |>
   ggplot(aes(x =porewater_drp_ugl, y = as.factor(crop), color = type, fill = type)) + 
   stat_summary(fun = mean, geom = "col",  # Changed to geom_col() for better bar orientation
-               position = position_dodge(width = 0.8), alpha = 0.5) + 
+               position = position_dodge(width = 0.9), alpha = 0.5) + 
   stat_summary(fun.data = mean_se, geom = "errorbar", 
-               width = 0.2, position = position_dodge(width = 0.8)) +  # Adding error bars for mean SE
-  scale_color_manual(
-    name = "Lysimeter \nDepth",          # Legend title
-    labels = c(
-      "45cm", "90cm"),          # Set labels matching the type column
-    values = c("coral", "cyan3")         # Set colors for '90cm' and '45cm'
-  ) + 
-  scale_fill_manual(
-    values = c("coral", "cyan3")         # Ensure fill matches color for clarity
-  ) + 
-  coord_cartesian(xlim = c(10, 230)) +     # Adjust xlim to fit Nitrate-N range
-  labs(title = "ISU", x = "DRP(μg/L)", y = "Crop") +  # Correct axis labels
+               width = 0.2, position = position_dodge(width = 0.9)) +  # Adding error bars for mean SE
+  scale_color + 
+  scale_fill + 
+  coord_cartesian(xlim = c(0, 230)) +     # Adjust xlim to fit Nitrate-N range
+  labs(title = "A) ISU", x = "DRP(μg/L)", y = "Crop") +  # Correct axis labels
   theme_classic() + 
   geom_vline(xintercept = c(0, 50, 100, 150, 200), linetype = "dashed", color = "black",alpha=0.2)  # Add dashed vertical lines
 isu.pplot
@@ -541,20 +535,13 @@ wiu.pplot<-mahadi.df |>
   filter(farm == "WIU") |>
   ggplot(aes(x = porewater_no3_mgl, y = as.factor(crop), color = type, fill = type)) + 
   stat_summary(fun = mean, geom = "col",  # Changed to geom_col() for better bar orientation
-               position = position_dodge(width = 0.8), alpha = 0.5) + 
+               position = position_dodge(width = 0.9), alpha = 0.5) + 
   stat_summary(fun.data = mean_se, geom = "errorbar", 
-               width = 0.2, position = position_dodge(width = 0.8)) +  # Adding error bars for mean SE
-  scale_color_manual(
-    name = "Lysimeter \nDepth",          # Legend title
-    labels = c(
-      "45cm", "90cm"),          # Set labels matching the type column
-    values = c("coral", "cyan3")         # Set colors for '90cm' and '45cm'
-  ) + 
-  scale_fill_manual(
-    values = c("coral", "cyan3")         # Ensure fill matches color for clarity
-  ) + 
+               width = 0.2, position = position_dodge(width = 0.9)) +  # Adding error bars for mean SE
+  scale_color + 
+  scale_fill + 
   coord_cartesian(xlim = c(0, 15)) +     # Adjust xlim to fit Nitrate-N range
-  labs(title = "WIU", x = "DRP(μg/L)", y = "Crop") +  # Correct axis labels
+  labs(title = "B) WIU", x = "DRP(μg/L)", y = "Crop") +  # Correct axis labels
   theme_classic() + 
   geom_vline(xintercept = c(0, 5, 10, 15), linetype = "dashed", color = "black",alpha=0.2)  # Add dashed vertical lines
 wiu.pplot
@@ -579,20 +566,13 @@ isu.aplot<-mahadi.df |>
   filter(farm == "ISU") |>
   ggplot(aes(x =porewater_nh3_mgl, y = as.factor(crop), color = type, fill = type)) + 
   stat_summary(fun = mean, geom = "col",  # Changed to geom_col() for better bar orientation
-               position = position_dodge(width = 0.8), alpha = 0.5) + 
+               position = position_dodge(width = 0.9), alpha = 0.5) + 
   stat_summary(fun.data = mean_se, geom = "errorbar", 
-               width = 0.2, position = position_dodge(width = 0.8)) +  # Adding error bars for mean SE
-  scale_color_manual(
-    name = "Lysimeter \nDepth",          # Legend title
-    labels = c(
-      "45cm", "90cm"),          # Set labels matching the type column
-    values = c("coral", "cyan3")         # Set colors for '90cm' and '45cm'
-  ) + 
-  scale_fill_manual(
-    values = c("coral", "cyan3")         # Ensure fill matches color for clarity
-  ) + 
-  coord_cartesian(xlim = c(0, 01)) +     # Adjust xlim to fit Nitrate-N range
-  labs(title = "ISU", x = "Ammonia(mg/L)", y = "Crop") +  # Correct axis labels
+               width = 0.2, position = position_dodge(width = 0.9)) +  # Adding error bars for mean SE
+  scale_color + 
+  scale_fill +  
+  coord_cartesian(xlim = c(0, 1)) +     # Adjust xlim to fit Nitrate-N range
+  labs(title = "A) ISU", x = "Ammonia(mg/L)", y = "Crop") +  # Correct axis labels
   theme_classic() + 
   geom_vline(xintercept = c(0, 0.25, 0.50, 0.75, 1.0), linetype = "dashed", color = "black",alpha=0.2)  # Add dashed vertical lines
 isu.aplot
@@ -603,20 +583,13 @@ wiu.aplot<-mahadi.df |>
   filter(farm == "WIU") |>
   ggplot(aes(x = porewater_nh3_mgl, y = as.factor(crop), color = type, fill = type)) + 
   stat_summary(fun = mean, geom = "col",  # Changed to geom_col() for better bar orientation
-               position = position_dodge(width = 0.8), alpha = 0.5) + 
+               position = position_dodge(width = 0.9), alpha = 0.5) + 
   stat_summary(fun.data = mean_se, geom = "errorbar", 
-               width = 0.2, position = position_dodge(width = 0.8)) +  # Adding error bars for mean SE
-  scale_color_manual(
-    name = "Lysimeter \nDepth",          # Legend title
-    labels = c(
-      "45cm", "90cm"),          # Set labels matching the type column
-    values = c("coral", "cyan3")         # Set colors for '90cm' and '45cm'
-  ) + 
-  scale_fill_manual(
-    values = c("coral", "cyan3")         # Ensure fill matches color for clarity
-  ) + 
+               width = 0.2, position = position_dodge(width = 0.9)) +  # Adding error bars for mean SE
+  scale_color + 
+  scale_fill +  
   coord_cartesian(xlim = c(0, 0.15)) +     # Adjust xlim to fit Nitrate-N range
-  labs(title = "WIU", x = "Ammonia(mg/L)", y = "Crop") +  # Correct axis labels
+  labs(title = "B) WIU", x = "Ammonia(mg/L)", y = "Crop") +  # Correct axis labels
   theme_classic() + 
   geom_vline(xintercept = c(0, 0.05, 0.10, 0.15), linetype = "dashed", color = "black",alpha=0.2)  # Add dashed vertical lines
 wiu.aplot
