@@ -121,8 +121,7 @@ summary(mod_gamma)
 
 #check residuals
 plot(residuals(mod_gamma, type="pearson") ~ fitted(mod_gamma))
-abline(h = 0, col="red")
-)
+abline(h = 0, col="red"))
 
 
 #very complex model try to simple it
@@ -131,6 +130,13 @@ mod1 <- update(mod_gamma, . ~ . - farm:year:crop:type)
 anova(mod_gamma, mod1, test = "Chisq") ## not fit p value >0.05
 
 #1 Test farm:year:crop
+
+
+
+
+
+
+
 
 
 
