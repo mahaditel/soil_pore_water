@@ -98,7 +98,7 @@ mod <- lmer(
 summary(mod)
 plot(residuals(mod))
 qqnorm(residuals(mod)); qqline(residuals(mod))
-###### data not normal
+###### residual not normal
 
 #as not normal and positively skewed, try to fit GLMM with gamma distribution
 library(glmmTMB)
@@ -109,7 +109,7 @@ summary(df$porewater_no3_mgl)
 min(df$porewater_no3_mgl)
 df[df$porewater_no3_mgl <= 0, ]
 
-
+###GLMM model
 mod_gamma <- glmmTMB(
   porewater_no3_mgl ~ farm * year * crop * type + original_coll_date +
     (1 | farm:year:block) +
@@ -129,134 +129,6 @@ abline(h = 0, col="red"))
 mod1 <- update(mod_gamma, . ~ . - farm:year:crop:type)
 anova(mod_gamma, mod1, test = "Chisq") ## not fit p value >0.05
 
-#1 Test farm:year:crop
-
-
-
-
-
-
-
-
-
-
-
-
-####error for negative value
-# Check for negative values
-sum(dat$porewater_no3_mgl < 0, na.rm = TRUE)
-# See which rows have negative values
-dat[dat$porewater_no3_mgl < 0 & !is.na(dat$porewater_no3_mgl_log), ]
-# Remove negative values before modeling
-dat_clean <- filter(dat, porewater_no3_mgl > 0)
-
-
-
-
-
-
-
-
-
-
-#Q_Q plot, resids not normal.
-qqnorm(resids)
-qqline(mahadi.df$porewater_no3_mgl, col = "red")
-
-#-----Nitrate-nitrogen--------------
-####Normality test#####
-
-#Histogram
-hist(mahadi.df$porewater_no3_mgl)
-
-#Shapiro_wilk#####
-shapiro.test(mahadi.df$porewater_no3_mgl)
-shapiro.test(mahadi.df$porewater_no3_mgl_log)
-
-#Q_Q plot
-qqnorm(mahadi.df$porewater_no3_mgl)
-qqline(mahadi.df$porewater_no3_mgl, col = "red")
-
-#---data not normal
-
-#as raw data not normal, trying to transform the data_log transformation to run parametric test
-####convert to log
-mahadi.df <-  mahadi.df |>
-  mutate(porewater_drp_mgl_log = log(porewater_drp_mgl+1),
-         porewater_no3_mgl_log = log(porewater_no3_mgl+1))
-
-####Normality test#####
-
-#Histogram
-hist(mahadi.df$porewater_no3_mgl_log) #seems normal #lets see other tests
-
-#Shapiro_wilk#####
-shapiro.test(mahadi.df$porewater_no3_mgl_log) #data not normal
-
-#Q_Q plot
-qqnorm(mahadi.df$porewater_no3_mgl_log)
-qqline(mahadi.df$porewater_no3_mgl_log, col = "red") #data not normal
-
-
-# Overall data not normal need to run non parametric tests
-
-#Generalized linear mixed model has been used for water quality data. 
-#####GLMMs- Generalized linear mixed model
-install.packages("lme4")      # run once
-install.packages("performance")  # for checks (optional)
-install.packages("glmmTMB")
-########
-library(lme4)
-library(performance)
-library(glmmTMB)
-library(emmeans)
-
-
-#GLMMs test
-
-# Make a site-specific date factor and a per-plot ID [As have missing samples and dates could be different ]
-dat <- mahadi.df
-dat$SiteDate <- interaction(dat$farm, dat$original_coll_date, drop = TRUE)
-dat$PlotID   <- interaction(dat$farm, dat$block, dat$plot, drop = TRUE)
-
-
-# Filter for Nitrate-N
-#nitrate <- subset(dat, Analyte == "porewater_no3_mgl_log")
-
-# Fit GLMM with Gamma distribution
-model_nitrate_glmm <- glmmTMB(
-  porewater_no3_mgl ~ crop * type * year +
-    (1 | farm) + (1 | block) + (1 | PlotID) + (1 | SiteDate),
-  data = dat,
-  family = Gamma(link = "log")
-)
-
-####error for negative value
-# Check for negative values
-sum(dat$porewater_no3_mgl < 0, na.rm = TRUE)
-# See which rows have negative values
-dat[dat$porewater_no3_mgl < 0 & !is.na(dat$porewater_no3_mgl_log), ]
-# Remove negative values before modeling
-dat_clean <- filter(dat, porewater_no3_mgl > 0)
-
-
-# Fit GLMM with Gamma distribution with clean data [removed negative value]
-model_nitrate_glmm <- glmmTMB(
-  porewater_no3_mgl_log ~ crop * type * year +
-    (1 | farm) + (1 | block) + (1 | PlotID) + (1 | SiteDate),
-  data = dat_clean,
-  family = Gamma(link = "log")
-)
-
-####
-summary(model_nitrate_glmm)
-anova(model_nitrate_glmm)
-
-
-
-#######date from row to collumn######
-unique_dates <- unique(dat$original_coll_date)
-unique_dates
 
 
 
