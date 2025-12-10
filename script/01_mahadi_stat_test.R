@@ -125,10 +125,33 @@ abline(h = 0, col="red"))
 
 
 #very complex model try to simple it
-#4 way anova####
-mod1 <- update(mod_gamma, . ~ . - farm:year:crop:type)
-anova(mod_gamma, mod1, test = "Chisq") ## not fit p value >0.05
 
+
+#trying to separate the data sets.
+df_ISU_2024_S <- subset(mahadi.df, farm == "ISU" & year == "2024" & type == "S")
+
+#change factors
+df_ISU_2024_S$crop  <- factor(df_ISU_2024_S$crop)
+df_ISU_2024_S$block <- factor(df_ISU_2024_S$block)
+df_ISU_2024_S$plot  <- factor(df_ISU_2024_S$plot)
+df_ISU_2024_S$original_coll_date  <- as.Date(df_ISU_2024_S$original_coll_date)
+
+
+#GLMM test at ISU, S, 2024
+library(glmmTMB)
+
+mod_ISU_2024_S <- glmmTMB(
+  porewater_no3_mgl ~ crop +
+    (1 | block) +
+    (1 | block:plot),
+  family = Gamma(link = "log"),
+  data = df_ISU_2024_S
+)
+summary(mod_ISU_2024_S)
+
+
+
+#make a box plot with this data depending on dates
 
 
 
