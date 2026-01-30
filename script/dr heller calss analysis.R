@@ -76,55 +76,32 @@ qqline(resid(model_depth)) #Seems normal
 # 6. ANOVA (Type III is best for interactions)
 anova_depth <- car::Anova(model_depth, type = "III", test.statistic = "F")
 print(anova_depth)
+ 
+#Save ANOVA table
+write.csv(as.data.frame(anova_depth), "output/anova_type3_results.csv", row.names = TRUE)
 
 
 
 # 7. Post-hoc Analysis
-# Case A: If the 3-way interaction (crop:year:type) is SIGNIFICANT:
 # We look at everything together.
 # depends on how to analyze
-emm_3way <- emmeans(model_depth, ~ type * crop * year)
+emm_3way <- emmeans(model_depth, ~ crop)
 multcomp::cld(emm_3way, Letters = letters)
+emm_sl_df <- summary(emm_3way)
+summary(emm_3way)
 
-# or
-emm_3way2 <- emmeans(model_depth, ~ type | crop | year)
-multcomp::cld(emm_3way2, Letters = letters)
-
-#interaction type*year
-emm_sl <- emmeans(model_depth, ~ type * year)
-emm_sl_df <- summary(emm_sl)
-multcomp::cld(emm_sl, Letters = letters)
-
+####back log transformation
 emm_sl_df <- emm_sl_df %>% 
   mutate( 
     no3 = (10^emmean)-1,
     se_plus = ((10^(emmean+SE))-1),
     se_minus =   ((10^(emmean-SE))-1)
   )
+
+#visualization
 emm_sl_df %>% 
-  ggplot(aes(x=type, y = no3, color = year))+
+  ggplot(aes(x=crop, y = no3))+
   geom_point()+
   geom_errorbar(aes(ymin = se_minus, ymax= se_plus))
 
-emm_crop_sl_yr <- emmeans(model_depth, ~ type * year *crop)
-emm_sl_yr_df <- summary(emm_crop_sl_yr)
-multcomp::cld(emm_crop_sl_yr, Letters = letters)
 
-emm_sl_yr_df <- emm_sl_yr_df %>% 
-  mutate( 
-    no3 = (10^emmean)-1,
-    se_plus = ((10^(emmean+SE))-1),
-    se_minus =   ((10^(emmean-SE))-1)
-  )%>%
-  mutate(
-    type = fct_relevel(type, "S", "L"))
-
-emm_sl_yr_df %>% 
-  ggplot(aes(x=crop, y = no3, color = type))+
-  geom_point(position = position_dodge2(width = 0.3))+
-  geom_errorbar(aes(ymin = se_minus, ymax= se_plus),
-                position = position_dodge2(width = 0.3),
-                width = 0.3) +
-  facet_grid(year~.)#, scales = "free"
-
-levels(emm_sl_yr_df$type)

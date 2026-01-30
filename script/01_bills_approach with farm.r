@@ -18,7 +18,7 @@ options(contrasts = c("contr.sum", "contr.poly"))
 
 # 2. Load and Clean Data
 # Assuming your file is in the working directory
-df <- read_csv("Data/porewater_all_data_24_25_plot_isu_shallow.csv")
+df <- read_csv("Data/porewater_ISU_24_25_shallow.csv")
 
 #raw data does not suitable for analysis need log transformation 
 df <-  df %>%  
@@ -128,6 +128,7 @@ ggplot(df_2425, aes(x = crop, y = log_no3, fill = year)) +
   ) +
   theme_minimal()
 
+
 # 4. Fit the Linear Mixed Model
 # Fixed effect: crop
 # Random effect: (1 | block) -> Accounts for the 4 blocks
@@ -228,14 +229,13 @@ ggplot(df_sl, aes(x = crop, y = porewater_no3_mgl, fill = type)) +
 #      This is the "whole plot error" term required for split-plot designs.
 
 model_depth <- lmer(
-  log_no3 ~ crop * type * year + (1 | block) + (1| year),
+  log_no3 ~ crop * type + (1 | block) + (1| year),
   data = df_sl
 )
 
 print(model_depth)
+
 ###Check the assumption with darma package
-
-
 simulationoutput<-
   simulateResiduals(fittedModel = model_depth, 500, plot = TRUE )
 
@@ -256,7 +256,7 @@ print(anova_depth)
 # Case A: If the 3-way interaction (crop:year:type) is SIGNIFICANT:
 # We look at everything together.
 # depends on how to analyze
-emm_3way <- emmeans(model_depth, ~ type * crop * year)
+emm_3way <- emmeans(model_depth, ~ type * crop)
 multcomp::cld(emm_3way, Letters = letters)
 
 # or
@@ -331,6 +331,9 @@ df_farm <- df_farm %>%
   mutate(
     type = fct_relevel(type, "S", "L")) %>%
   na.omit()
+####save data
+write.csv(df_farm, "porewater_all data_ISU_WIU.csv", row.names = FALSE)
+
 levels(df_farm$farm)
 
 
